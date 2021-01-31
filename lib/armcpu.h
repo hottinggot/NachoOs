@@ -4,6 +4,6 @@
 void enable_irq(void);
 void enable_fiq(void);
 void disable_irq(void);
-void disabpe_fiq(void);
+void disable_fiq(void);
 
 #endif /* LIB_ARMCPU_H_ */

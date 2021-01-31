@@ -4,7 +4,7 @@
 #include "HalInterrupt.h"
 #include "armcpu.h"
 
-extern volatile GicCpu_t* GicCpu;
+extern volatile GicCput_t* GicCpu;
 extern volatile GicDist_t* GicDist;
 
 static InterHdlr_fptr sHandlers[INTERRUPT_HANDLER_NUM];
@@ -56,7 +56,7 @@ void Hal_interrupt_register_handler(InterHdlr_fptr handler, uint32_t interrupt_n
 
 void Hal_interrupt_run_handler(void)
 {
-	uint32_t interrupt_num = GicCpu->interruptack.bits.InterruptId;
+	uint32_t interrupt_num = GicCpu->interruptack.bits.InterruptID;
 
 	if(sHandlers[interrupt_num] != NULL)
 	{

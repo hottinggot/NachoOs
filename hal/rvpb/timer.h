@@ -23,7 +23,7 @@ typedef union TimerXRIS_t {
 	} bits;
 } TimerXRIS_t;
 
-typedef union TImerXMIS_t {
+typedef union TimerXMIS_t {
 	uint32_t all;
 	struct {
 		uint32_t TimerXMIS:1; //[0]
