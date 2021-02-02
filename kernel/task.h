@@ -2,6 +2,7 @@
 #define KERNEL_TASK_H_
 
 #include "MemoryMap.h"
+#include "stdint.h"
 
 #define NOT_ENOUGH_TASK_NUM 0xFFFFFFFF
 
@@ -25,7 +26,11 @@ typedef struct KernelTcb_t
 typedef void (*KernelTaskFunc_t)(void);
 
 void Kernel_task_init(void);
-uint32_t Kernel_task_create(KernelTaskFunc_t startFunc, uint32_t priority);
+void Kernel_task_start(void);
+uint32_t Kernel_task_create(KernelTaskFunc_t startFunc);
+void Kernel_task_scheduler(void);
+
+
 
 #endif /* KERNEL_TASK_H_ */
 

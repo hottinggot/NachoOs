@@ -2,10 +2,13 @@
 #include "HalUart.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include "task.h"
+#include "Kernel.h"
 
 static void Hw_init(void);
 static void Printf_test(void);
 static void Timer_test(void);
+static void Kernel_init(void);
 
 void User_task0(void);
 void User_task1(void);
@@ -18,7 +21,10 @@ void nacho(void)
 	putstr("Hello World!\n");
 
 	Printf_test();
-	Timer_test();
+	//Timer_test();
+	//
+	
+	Kernel_init();
 
 	uint32_t* i = 100;
 	while(i--)
@@ -76,23 +82,34 @@ static void Kernel_init(void)
 	if(taskId == NOT_ENOUGH_TASK_NUM) {
                 putstr("Task2 creation fail\n");
         }
+
+	Kernel_start();
 }
 
 void User_task0(void)
 {
-	debug_printf("User Task #0\n");
+	//debug_printf("User Task #0\n");
 
-	while(1);
+	while(1) {
+		debug_printf("User Task #0\n");
+		Kernel_yield();
+	}
 }
 
 void User_task1(void)
 {
 	debug_printf("User Task #1\n");
-	while(1);
+	while(1) {
+		debug_printf("User Task #1\n");
+		Kernel_yield();
+	}
 }
 
 void User_task2(void)
 {
 	debug_printf("User Task #2\n");
-	while(1);
+	while(1){
+		debug_printf("User Task #2\n");
+		Kernel_yield();
+	}
 }

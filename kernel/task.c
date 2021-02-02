@@ -1,6 +1,10 @@
 #include "stdint.h"
 #include "ARMv7AR.h"
 #include "task.h"
+#include "switch.h"
+
+KernelTcb_t* sCurrent_tcb;
+KernelTcb_t* sNext_tcb;
 
 static KernelTcb_t sTask_list[MAX_TASK_NUM];
 static uint32_t sAllocated_tcb_index;
@@ -12,6 +16,7 @@ static KernelTcb_t* Scheduler_priority_algorithm(void);
 void Kernel_task_init(void)
 {
 	sAllocated_tcb_index = 0;
+	sCurrent_tcb_index = 0;
 
 	for(uint32_t i=0; i<MAX_TASK_NUM; i++) {
 		sTask_list[i].stack_base = (uint8_t*)(TASK_STACK_START + i*USR_TASK_STACK_SIZE);
@@ -25,7 +30,13 @@ void Kernel_task_init(void)
 	}
 }
 
-uint32_t Kernel_task_create(KernelTaskFunc_t startFunc, uint32_t priority)
+void Kernel_task_start(void)
+{
+	sNext_tcb = &sTask_list[sCurrent_tcb_index];
+	Restore_context();
+}
+
+uint32_t Kernel_task_create(KernelTaskFunc_t startFunc)
 {
 	KernelTcb_t* new_tcb = &sTask_list[sAllocated_tcb_index++];
 
@@ -33,10 +44,9 @@ uint32_t Kernel_task_create(KernelTaskFunc_t startFunc, uint32_t priority)
 		return NOT_ENOUGH_TASK_NUM;
 	}
 
-	new_tcb->priority = priority;
 
 	KernelTaskContext_t* ctx = (KernelTaskContext_t*)new_tcb->sp;
-	ctx->pc = (uint32_t)statrFunc;
+	ctx->pc = (uint32_t)startFunc;
 
 	return sAllocated_tcb_index-1;
 }
@@ -51,18 +61,25 @@ static KernelTcb_t* Scheduler_round_robin_algorithm(void)
 
 static KernelTcb_t* Scheduler_priority_algorithm(void)
 {
-	KernelTcb_t* sCurrent = &list[sCurrent_tcb_index];
+	sCurrent_tcb = &sTask_list[sCurrent_tcb_index];
 	for(uint32_t i=0; i<sAllocated_tcb_index; i++)
 	{
 		KernelTcb_t* pNextTcb = &sTask_list[i];
-		if(pNextTcb != sCurrent)
+		if(pNextTcb != sCurrent_tcb)
 		{
-			if(pNextTcb->priority <= sCurrent->priority)
+			if(pNextTcb->priority <= sCurrent_tcb->priority)
 			{
 				return pNextTcb;
 			}
 		}
 	}
-	return sCurrent;
+	return sCurrent_tcb;
 }
 
+void Kernel_task_scheduler(void)
+{
+	sCurrent_tcb = &sTask_list[sCurrent_tcb_index];
+	sNext_tcb = Scheduler_round_robin_algorithm();
+
+	Kernel_task_context_switching();
+}
