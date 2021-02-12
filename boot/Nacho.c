@@ -4,6 +4,7 @@
 #include "stdlib.h"
 #include "task.h"
 #include "Kernel.h"
+#include "event.h"
 
 static void Hw_init(void);
 static void Printf_test(void);
@@ -67,12 +68,13 @@ static void Kernel_init(void)
 	uint32_t taskId;
 
 	Kernel_task_init();
+	Kernel_event_flag_init();
 
 	taskId = Kernel_task_create(User_task0);
 	if(taskId == NOT_ENOUGH_TASK_NUM) {
 		putstr("Task0 creation fail\n");
 	}
-
+/*
 	taskId = Kernel_task_create(User_task1);
 	if(taskId == NOT_ENOUGH_TASK_NUM) {
                 putstr("Task1 creation fail\n");
@@ -82,20 +84,31 @@ static void Kernel_init(void)
 	if(taskId == NOT_ENOUGH_TASK_NUM) {
                 putstr("Task2 creation fail\n");
         }
+*/	
 
 	Kernel_start();
 }
 
 void User_task0(void)
 {
-	//debug_printf("User Task #0\n");
+	uint32_t local = 0;
+	
+	debug_printf("User Task #0\n");
 
 	while(1) {
-		debug_printf("User Task #0\n");
+		KernelEventFlag_t handle_event = Kernel_wait_events(KernelEventFlag_UartIn);
+		switch(handle_event) 
+		{
+			case KernelEventFlag_UartIn :
+				debug_printf("\nEvent Handled\n");
+				break;
+		}
 		Kernel_yield();
+
 	}
 }
 
+/*
 void User_task1(void)
 {
 	debug_printf("User Task #1\n");
@@ -113,3 +126,4 @@ void User_task2(void)
 		Kernel_yield();
 	}
 }
+*/
